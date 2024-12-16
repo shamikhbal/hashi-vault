@@ -1,6 +1,6 @@
 interface VaultClientConfig {
     baseURL: string;
-    rootPath: string;
+    rootPath?: string;
     appRole: string;
     roleId: string;
     secretId: string;
@@ -8,11 +8,13 @@ interface VaultClientConfig {
 }
 
 interface GetSecretParams {
+    rootPath?: string;
     path: string;
     token?: string;
 }
 
 interface CreateSecretParams {
+    rootPath?: string;
     path: string;
     data: Record<string, any>;
     token?: string;
@@ -20,7 +22,7 @@ interface CreateSecretParams {
 
 declare class HashiVault {
     private fetcher;
-    private rootPath;
+    private rootPath?;
     private appRole;
     private roleId;
     private secretId;
@@ -50,13 +52,13 @@ declare class HashiVault {
      * @param {GetSecretParams} params - Parameters for getting a secret
      * @returns {Promise<any>} - Secret data
      */
-    getSecret({ path }: GetSecretParams): Promise<any>;
+    getSecret({ rootPath, path }: GetSecretParams): Promise<any>;
     /**
      * Create or update a secret in Vault
      * @param {CreateSecretParams} params - Parameters for creating or updating a secret
      * @returns {Promise<any>} - Response data from the Vault server
      */
-    createSecret({ path, data }: CreateSecretParams): Promise<any>;
+    createSecret({ rootPath, path, data, }: CreateSecretParams): Promise<any>;
 }
 
 export { type CreateSecretParams, type GetSecretParams, HashiVault, type VaultClientConfig };

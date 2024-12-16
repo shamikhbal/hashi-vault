@@ -6,7 +6,7 @@ import { CreateSecretParams } from "./types/create-secret-params";
 
 export class HashiVault {
   private fetcher: ReturnType<typeof create_instance>;
-  private rootPath: string;
+  private rootPath?: string;
   private appRole: string;
   private roleId: string;
   private secretId: string;
@@ -29,7 +29,10 @@ export class HashiVault {
       baseURL,
       logging: logging,
     });
-    this.rootPath = rootPath;
+
+    if (rootPath) {
+      this.rootPath = rootPath;
+    }
     this.appRole = appRole;
     this.roleId = roleId;
     this.secretId = secretId;
@@ -89,11 +92,11 @@ export class HashiVault {
    * @param {GetSecretParams} params - Parameters for getting a secret
    * @returns {Promise<any>} - Secret data
    */
-  async getSecret({ path }: GetSecretParams): Promise<any> {
+  async getSecret({ rootPath, path }: GetSecretParams): Promise<any> {
     const token = await this.getToken();
     const response = await this.fetcher({
       method: methods.get,
-      url: `/${this.rootPath}/data/${path}`,
+      url: `/${rootPath || this.rootPath}/data/${path}`,
       contentType: contentTypes.json,
       headers: {
         "X-Vault-Token": token,
@@ -108,11 +111,15 @@ export class HashiVault {
    * @param {CreateSecretParams} params - Parameters for creating or updating a secret
    * @returns {Promise<any>} - Response data from the Vault server
    */
-  async createSecret({ path, data }: CreateSecretParams): Promise<any> {
+  async createSecret({
+    rootPath,
+    path,
+    data,
+  }: CreateSecretParams): Promise<any> {
     const token = await this.getToken();
     const response = await this.fetcher({
       method: methods.post,
-      url: `/${this.rootPath}/data/${path}`,
+      url: `/${rootPath || this.rootPath}/data/${path}`,
       contentType: contentTypes.json,
       headers: {
         "X-Vault-Token": token,
